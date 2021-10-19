@@ -1,0 +1,19 @@
+{
+  "type": "postgres",
+  "host": "localhost",
+  "port": 5432,
+  "username": "ubuntu",
+  "password": "abhishek",
+  "schema": "public",
+  "database": "dbacs",
+  "entities": ["src/domain/*.ts"],
+  "migrations": [
+        "src/migration/1634647911479-InitialData.ts"
+  ],
+  "cli": {
+    "migrationsDir": "src/migration"
+  },
+  "migrationsTableName": "migration"
+}
+
+
