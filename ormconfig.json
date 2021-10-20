@@ -7,13 +7,9 @@
   "schema": "public",
   "database": "dbacs",
   "entities": ["src/domain/*.ts"],
-  "migrations": [
-        "src/migration/1634647911479-InitialData.ts"
-  ],
+  "migrations": ["src/migration/1634647911479-InitialTableSetup.ts"],
   "cli": {
     "migrationsDir": "src/migration"
   },
   "migrationsTableName": "migration"
 }
-
-
