@@ -6,6 +6,7 @@ import { Role } from '../domain/role';
 import { Team } from '../domain/team';
 import { TeamDb } from '../domain/team-db';
 import { TeamMemberRole } from '../domain/team-member-role';
+import { DatabaseCredential } from '../domain/database-credential';
 
 export const databaseProviders = [
   {
@@ -19,7 +20,15 @@ export const databaseProviders = [
         username: configService.get<string>('DB_USERNAME'),
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_NAME'),
-        entities: [Database, Member, Role, TeamDb, TeamMemberRole, Team],
+        entities: [
+          Database,
+          Member,
+          Role,
+          TeamDb,
+          TeamMemberRole,
+          Team,
+          DatabaseCredential,
+        ],
         synchronize: configService.get<string>('TESTING') === 'true',
       }),
   },
