@@ -5,9 +5,11 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { DatabaseCredential } from './database-credential';
 import { Member } from './member';
 import { Role } from './role';
 import { Team } from './team';
@@ -38,4 +40,10 @@ export class TeamMemberRole {
   @ManyToOne(() => Team, (team) => team.teamMemberRoles)
   @JoinColumn([{ name: 'team_id', referencedColumnName: 'teamId' }])
   team: Team;
+
+  @OneToMany(
+    () => DatabaseCredential,
+    (databaseCredential) => databaseCredential.creator,
+  )
+  databaseCredentials: DatabaseCredential[];
 }

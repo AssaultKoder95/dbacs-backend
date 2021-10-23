@@ -1,12 +1,20 @@
 import {
+  Body,
   Controller,
+  Delete,
   Get,
   Inject,
   InternalServerErrorException,
+  NotFoundException,
+  Param,
+  Post,
+  Put,
+  Request,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiProperty, ApiTags } from '@nestjs/swagger';
-import { Repository } from 'typeorm';
+import { ApiBearerAuth, ApiBody, ApiProperty, ApiTags } from '@nestjs/swagger';
+import { DeepPartial, Repository } from 'typeorm';
+import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { AppLogger } from '../common/logger';
 import { Member } from '../domain/member';
@@ -74,5 +82,66 @@ export class TeamController {
       const errorString = JSON.stringify(err, Object.getOwnPropertyNames(err));
       throw new InternalServerErrorException(errorString);
     }
+  }
+
+  @ApiBody({ type: CreateTeamDTO })
+  @UseGuards(JwtAuthGuard)
+  @Post()
+  async create(@Request() request: any, @Body() body: DeepPartial<Team>) {
+    try {
+      const team = await this.teamRepository.save(body);
+      const role = await this.roleRespository.findOne('TL');
+      if (!role) {
+        throw new NotFoundException();
+      }
+
+      let member = await this.memberRepository.findOne({
+        email: request.user.username, // The current user is set as the default tech lead
+      });
+
+      if (!member) {
+        member = new Member();
+        member.email = request.user.username;
+        member.name = body.name;
+        member = await this.memberRepository.save(member);
+      }
+
+      let teamMemberRole = await this.teamMemberRoleRepository.findOne({
+        member,
+        team,
+        role,
+      });
+
+      if (!teamMemberRole) {
+        teamMemberRole = new TeamMemberRole();
+        teamMemberRole.member = member;
+        teamMemberRole.team = team;
+        teamMemberRole.role = role;
+        teamMemberRole = await this.teamMemberRoleRepository.save(
+          teamMemberRole,
+        );
+      }
+      return team;
+    } catch (err) {
+      this.logger.error(err);
+      const errorString = JSON.stringify(err, Object.getOwnPropertyNames(err));
+      throw new InternalServerErrorException(errorString);
+    }
+  }
+
+  @ApiBody({ type: CreateTeamDTO })
+  @UseGuards(JwtAuthGuard)
+  @Put(':id')
+  async update(
+    @Param('id') id: string,
+    @Body() body: QueryDeepPartialEntity<Team>,
+  ) {
+    return this.teamRepository.update(id, body);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id')
+  async softDelete(@Param('id') id: string) {
+    return this.teamRepository.softDelete(id);
   }
 }
